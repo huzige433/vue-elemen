@@ -1,37 +1,48 @@
 <template>
-    <div v-loading="loading" element-loading-text="登录中..." element-loading-spinner="el-icon-loading" element-loading-background="rgba(0, 0, 0, 0.6)" class="login-container">
+    <div v-loading="loading" element-loading-text="注册中..." element-loading-spinner="el-icon-loading" element-loading-background="rgba(0, 0, 0, 0.6)" class="regist-container">
    
-      <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" auto-complete="on" label-position="left">
+      <el-form ref="registForm" :model="registForm" :rules="registRules" class="regist-form" auto-complete="on" label-position="left">
         <!-- 头像区域 -->
         <div v-if="TxStatus" class="avatar-box">
           <img src="../assets/logo.png" alt="">
         </div>
    
         <div class="title-container">
-          <h3 class="title">账号登录</h3>
+          <h3 class="title">账号注册</h3>
         </div>
    
         <el-form-item prop="username">
           <span class="svg-container">
             <i class="el-icon-user"></i>
           </span>
-          <el-input ref="username" v-model="loginForm.username" placeholder="Username" name="username" type="text" tabindex="1" auto-complete="on" />
+          <el-input ref="username" v-model="registForm.username" placeholder="输入账号" name="username" type="text" tabindex="1" auto-complete="on" />
         </el-form-item>
    
         <el-form-item prop="password">
           <span class="svg-container">
             <i class="el-icon-user-solid"></i>
           </span>
-          <el-input :key="passwordType" ref="password" v-model="loginForm.password" :type="passwordType" placeholder="Password" name="password" tabindex="2" auto-complete="on" @keyup.enter.native="handleLogin" />
+          <el-input :key="passwordType" ref="password" v-model="registForm.password" :type="passwordType" placeholder="输入密码" name="password" tabindex="2" auto-complete="on" />
           <span class="show-pwd" @click="showPwd">
             <i :class="passwordType === 'password' ? 'el-icon-circle-check' : 'el-icon-circle-close'" />
           </span>
         </el-form-item>
+        
+        <el-form-item prop="checkpassword">
+          <span class="svg-container">
+            <i class="el-icon-user-solid"></i>
+          </span>
+          <el-input :key="passwordType" ref="checkpassword" v-model="registForm.checkpassword" :type="passwordType" placeholder="再次输入密码" name="checkpassword" tabindex="3" auto-complete="on" @keyup.enter.native="handleregist" />
+          <span class="show-pwd" @click="showPwd">
+            <i :class="passwordType === 'password' ? 'el-icon-circle-check' : 'el-icon-circle-close'" />
+          </span>
+        </el-form-item>
+
         <div>
-          <el-button type="primary" style="width:100%;margin-bottom:20px;" @click.native.prevent="handleLogin">登录</el-button>
+          <el-button type="primary" style="width:100%;margin-bottom:20px;" @click.native.prevent="handleregist">注册</el-button>
         </div>
         <div class="tips">
-          <span style="margin-right:20px;">如果您还没有账号请先 <span style="color:#409EFF;cursor:pointer" @click="register">注册</span></span>
+          <span style="margin-right:20px;">已经有账号请去 <span style="color:#409EFF;cursor:pointer" @click="login">登录</span></span>
         </div>
    
       </el-form>
@@ -41,7 +52,7 @@
   <script>
    
   export default {
-    name: 'Login',
+    name: 'Register',
     data() {
       const validateUsername = (rule, value, callback) => {
         if (!value.trim()) {
@@ -57,17 +68,30 @@
           callback()
         }
       }
+      const validatePassword2 = (rule, value, callback) => {
+        if (value.length < 6) {
+          callback(new Error('密码最少为6位字符！'))
+        }else if(value!=this.registForm.password){
+          callback(new Error("两次密码不一致"))
+        }
+        else {
+          callback()
+        }
+      }
+
       return {
         // 头像状态
         TxStatus: true,
-        loginForm: {
+        registForm: {
           username: '',
-          password: ''
+          password: '',
+          checkpassword:''
         },
         // 登录规则
-        loginRules: {
+        registRules: {
           username: [{ required: true, trigger: 'blur', validator: validateUsername }],
-          password: [{ required: true, trigger: 'blur', validator: validatePassword }]
+          password: [{ required: true, trigger: 'blur', validator: validatePassword }],
+          checkpassword: [{ required: true, trigger: 'blur', validator: validatePassword2 }]
         },
         loading: false,
         passwordType: 'password',
@@ -93,14 +117,14 @@
           this.$refs.password.focus()
         })
       },
-      // 登录业务
-      handleLogin() {
-        this.$refs.loginForm.validate((valid) => {
+      // 注册业务
+      handleregist() {
+        this.$refs.registForm.validate((valid) => {
           // 如果符合验证规则
           if (valid) {
             this.loading = true
             setTimeout(() => {
-              this.$store.dispatch('user/login', this.loginForm).then(() => {
+              this.$store.dispatch('user/register', this.registForm).then(() => {
                 this.$router.push({ path: this.redirect || '/' })
                 this.loading = false
               }).catch(() => {
@@ -113,10 +137,10 @@
           }
         })
       },
-      // 注册业务
-      register() {
+      // 注册跳转登录
+      login() {
         console.log('123')
-        this.$router.push({ name: 'Register' })
+        this.$router.push({ name: 'Login' })
       }
     }
   }
@@ -127,11 +151,11 @@
   $light_gray: #fff;
   $cursor: #fff;
   @supports (-webkit-mask: none) and (not (cater-color: $cursor)) {
-    .login-container .el-input input {
+    .regist-container .el-input input {
       color: $cursor;
     }
   }
-  .login-container {
+  .regist-container {
     .el-input {
       display: inline-block;
       height: 47px;
@@ -171,7 +195,7 @@
   $dark_gray: #889aa4;
   $light_gray: #eee;
    
-  .login-container {
+  .regist-container {
     min-height: 100%;
     width: 100%;
     height: 100vh;
@@ -195,7 +219,7 @@
       }
     }
    
-    .login-form {
+    .regist-form {
       position: relative;
       width: 520px;
       max-width: 100%;
