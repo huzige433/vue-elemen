@@ -6,7 +6,7 @@ import router from './router'
 import ElementUI from 'element-ui'
 import VueRouter from 'vue-router'
 import 'element-ui/lib/theme-chalk/index.css'
-
+import axios from 'axios'
 
 //引入quill-editor编辑器
 import VueQuillEditor from 'vue-quill-editor' 
@@ -27,6 +27,9 @@ Quill.register('modules/imageResize', imageResize)
 Vue.config.productionTip = false
 Vue.use(VueRouter)
 Vue.use(ElementUI)
+Vue.prototype.$http = axios
+axios.defaults.baseURL = 'http://yufei.shop:3000'
+
 /* eslint-disable no-new */
 new Vue({
   el: '#app',

@@ -13,8 +13,8 @@ export default new Router({
   routes: [
     {
       path: '/',
-      name: 'HelloWorld',
-      component: HelloWorld
+      name: 'login',
+      component: Login
     },
     {
       path: '/login',
@@ -42,5 +42,6 @@ export default new Router({
       component: Editor
     },
   ],
-  mode: 'history'
+  mode: 'hash',
+  base: "/"
 })

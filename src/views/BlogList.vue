@@ -29,8 +29,8 @@
         </el-header>
         <el-main>
           <el-table :data="tableData" >
-            <el-table-column prop="name" label="标题" width="200px" />
-            <el-table-column prop="address" label="描述" />
+            <el-table-column prop="title" label="标题" width="200px" />
+            <el-table-column prop="content" label="描述" />
             <el-table-column prop="date" label="日期" width="200px" />
           </el-table>
         </el-main>
@@ -52,18 +52,17 @@
 
 <script>
 import Editor from './Editor.vue'
+import http from "../utils/requets"
 
 export default {
   name: "BlogList",
   components: { Editor },
+  mounted () {
+    this.showbloglist()
+  },
   data() {
-    const item = {
-      date: '2016-05-02',
-      name: '王小虎王小虎王',
-      address: '上海市普陀区金沙江路 1518 弄上海市普陀区金沙江路 1518 弄上海市普陀区金沙江路 1518 弄'
-    };
     return {
-      tableData: Array(20).fill(item),
+      tableData: new Array(),
       isShowMultiple: false
     }
   },
@@ -78,6 +77,23 @@ export default {
     },
     quitout(){
       this.$router.push({ name: 'Login' })
+    },
+    showbloglist(){
+      var options = {
+            method: 'GET',
+            url: 'http://127.0.0.1:8080/blog/list'
+          };
+          http(options).then((response) => {
+            this.loading = false
+            if (response.flag) {
+                this.tableData=response.data
+            } else {
+              alert("显示失败")
+            }
+          }).catch(function (error) {
+            this.loading = false
+            alert("显示失败")
+          })
     }
   }
 };
