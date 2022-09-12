@@ -5,7 +5,6 @@ import Register from '@/views/Register'
 import BlogList from '@/views/BlogList'
 import Article from '@/views/Article'
 import Editor from '@/views/Editor'
-import HelloWorld from '@/components/HelloWorld'
 
 Vue.use(Router)
 
