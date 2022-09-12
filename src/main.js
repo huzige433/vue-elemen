@@ -7,6 +7,7 @@ import ElementUI from 'element-ui'
 import VueRouter from 'vue-router'
 import 'element-ui/lib/theme-chalk/index.css'
 import axios from 'axios'
+import store from './store'
 
 //引入quill-editor编辑器
 import VueQuillEditor from 'vue-quill-editor' 
@@ -28,11 +29,31 @@ Vue.config.productionTip = false
 Vue.use(VueRouter)
 Vue.use(ElementUI)
 Vue.prototype.$http = axios
-axios.defaults.baseURL = 'http://yufei.shop:3000'
+axios.defaults.baseURL = 'http://127.0.0.1:8080'
+
+router.beforeEach((to,from,next)=>{
+  let token=localStorage.getItem("token");
+  console.log(to.path)
+  if(to.path!='/login'){
+    if(token==null || token==''){
+      next({path:'/login'})
+      // next()
+    }else{
+      next()
+    }
+  }else if(to.path=='/login' && (token==null || token=='')){
+    next()
+  }else if(to.path=='/login' && (token!=null || token!='')){
+    next({name:'BlogList'})
+  }
+})
+
+
 
 /* eslint-disable no-new */
 new Vue({
   el: '#app',
   router,
+  store,
   render:h=>h(App)
 })

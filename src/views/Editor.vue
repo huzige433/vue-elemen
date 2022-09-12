@@ -1,8 +1,10 @@
 <template>
     <div>
       <div>
-        <el-button @click="openContent" type="primary" style="margin-left: 50%;">查看元素</el-button>
+        <el-button @click="openContent" type="primary" style="margin-left: 45%;display:inline-block;">查看元素</el-button>
+        <el-button @click="updataContent" type="primary" style="display:inline-block;">上传文章</el-button>
       </div>
+      <el-input v-model="title"></el-input>
       <div id='quillEditorQiniu'>
         <!-- 基于elementUi的上传组件 el-upload begin-->
         <el-upload
@@ -26,6 +28,7 @@
   <script>
 //   import * as Quill from 'quill'
   import {Quill} from 'vue-quill-editor' 
+  import http from '../utils/requets'
 window.Quill = Quill
 
 const scriptEl = document.createElement('script'); 
@@ -64,6 +67,7 @@ head.appendChild(scriptEl);
     name:"Editor",
     data(){
       return {
+        title:"",
         headers: {
           Authorization: "Bearer " + getToken(),
         },
@@ -156,6 +160,28 @@ head.appendChild(scriptEl);
       openContent:function (){
         console.log(this.content)
       },
+      updataContent:function(){
+      var that=this
+          setTimeout(()=> {
+          //async  await  是解决异步的一种方案，必须要加，但是原生封装就不用
+          var options = {
+            method: 'POST',
+            url: 'http://127.0.0.1:8080/blog/save',
+            data: {title:this.title,content:this.content,userid:this.$store.getters.getUser.id,descript:this.content.replace(/<\/?.+?>/g, "").trim().substring(0,10)}
+          };
+          http(options).then(response => {
+            if (response.flag) {
+              alert("发布成功")
+              that.$router.push({ name: "Article",query:{articleid:response.data.id} })
+            } else {
+              console.log("发布失败")
+              alert("发布失败")
+            }
+          }).catch(error => {
+            alert("发布失败")
+          })
+        }, 1000);  
+      }
   
     },
     created () {

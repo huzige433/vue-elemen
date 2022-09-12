@@ -7,15 +7,12 @@
         <el-main>
             <el-row type="flex" class="row-bg" justify="center" :span="24">
                 <el-col :span="8"><div class="grid-content bg-purple-light" style="text-align:center">
-                    <h1>我是标题</h1>
+                    <h1>{{Article.title}}</h1>
                 </div></el-col>
             </el-row>
             <el-row type="flex" class="row-bg" justify="center" :span="24">
-                <el-col :span="18"><div class="grid-content bg-purple-light" >
-                    <div>我是内容</div>
-                    <div>我是内容</div>
-                    <div>我是内容</div>
-                    <div>我是内容</div>
+                <el-col :span="18"><div class="grid-content bg-purple-light" v-html="Article.content">
+
                 </div></el-col>
             </el-row>
 
@@ -29,13 +26,44 @@
 </template>
 
 <script>
+import http from '../utils/requets'
+
     export default {
     name:"Articl",
+    data () {
+      return {
+        Article:''
+      }
+    },
       methods: {
         goBack() {
           this.$router.push({name:"BlogList"})
           console.log('go back');
-        }
+        },
+        //获取文章内容
+      loginsubmit() {
+      var that=this
+          //async  await  是解决异步的一种方案，必须要加，但是原生封装就不用
+          var options = {
+            method: 'GET',
+            url: 'http://127.0.0.1:8080/blog/article',
+            params:{articleid:this.$route.query.articleid}
+          };
+          http(options).then((response) => {
+            that.loading = false
+            if (response.id) {
+              this.Article=response
+
+            } else {
+              console.log("获取失败")
+              alert("获取失败")
+            }
+          }).catch(error => {
+            alert("获取失败")})
+    }
+      },
+      mounted () {
+        this.loginsubmit()
       }
     }
   </script>

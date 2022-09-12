@@ -6,7 +6,15 @@
 
 <script>
 export default {
-  name: 'App'
+  name: 'App',
+  methods: {
+    saveState(){
+      sessionStorage.setItem('state',JSON.stringify(this.$store.state));
+    }
+  },
+  mounted(){
+    this.saveState()
+  }
 }
 </script>
 

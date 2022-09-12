@@ -28,7 +28,7 @@
         <el-input :key="passwordType" ref="password" v-model="loginForm.password" :type="passwordType"
           placeholder="Password" name="password" tabindex="2" auto-complete="on" @keyup.enter.native="loginsubmit" />
         <span class="show-pwd" @click="showPwd">
-          <i :class="passwordType === 'password' ? 'el-icon-circle-check' : 'el-icon-circle-close'" />
+          <i :class="passwordType === 'password' ? 'el-icon-circle-check' : 'el-icon-circle-close'" ></i>
         </span>
       </el-form-item>
       <div>
@@ -114,7 +114,8 @@ export default {
           this.$http(options).then((response) => {
             that.loading = false
             if (response.data.flag) {
-              localStorage.setItem("token",response.data.data)
+              localStorage.setItem("token",response.data.token)
+              this.$store.dispatch('asyncUpdateUser', {username:response.data.data.username,id:response.data.data.id})
               that.$router.push({ name: "BlogList" })
             } else {
               console.log("登录失败")

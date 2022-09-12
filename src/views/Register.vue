@@ -24,7 +24,7 @@
           </span>
           <el-input :key="passwordType" ref="password" v-model="registForm.password" :type="passwordType" placeholder="输入密码" name="password" tabindex="2" auto-complete="on" />
           <span class="show-pwd" @click="showPwd">
-            <i :class="passwordType === 'password' ? 'el-icon-circle-check' : 'el-icon-circle-close'" />
+            <i :class="passwordType === 'password' ? 'el-icon-circle-check' : 'el-icon-circle-close'" ></i>
           </span>
         </el-form-item>
         
@@ -34,7 +34,7 @@
           </span>
           <el-input :key="passwordType" ref="checkpassword" v-model="registForm.checkpassword" :type="passwordType" placeholder="再次输入密码" name="checkpassword" tabindex="3" auto-complete="on" @keyup.enter.native="handleregist" />
           <span class="show-pwd" @click="showPwd">
-            <i :class="passwordType === 'password' ? 'el-icon-circle-check' : 'el-icon-circle-close'" />
+            <i :class="passwordType === 'password' ? 'el-icon-circle-check' : 'el-icon-circle-close'" ></i>
           </span>
         </el-form-item>
 
@@ -50,7 +50,6 @@
   </template>
    
   <script>
-   
   export default {
     name: 'Register',
     data() {
@@ -119,29 +118,42 @@
       },
       // 注册业务
       handleregist() {
-        this.$refs.registForm.validate((valid) => {
-          // 如果符合验证规则
-          if (valid) {
-            this.loading = true
-            setTimeout(() => {
-              this.$store.dispatch('user/register', this.registForm).then(() => {
-                this.$router.push({ path: this.redirect || '/' })
-                this.loading = false
-              }).catch(() => {
-                this.loading = false
-              })
-            }, 1500)
-          } else {
-            console.log('error submit!!')
-            return false
-          }
-        })
-      },
+      var that=this
+      this.$refs.registForm.validate((valid) => {
+        if (valid) {
+          this.loading = true
+          setTimeout(()=> {
+          //async  await  是解决异步的一种方案，必须要加，但是原生封装就不用
+          var options = {
+            method: 'POST',
+            url: 'http://127.0.0.1:8080/v1/register',
+            data: this.registForm
+          };
+          this.$http(options).then((response) => {
+            that.loading = false
+            if (response.data.flag) {
+              alert("注册成功，马上跳转")
+              that.$router.push({ name: "Login" })
+            } else {
+              console.log("注册失败")
+              alert("注册失败")
+            }
+          }).catch(error => {
+            alert("注册失败")
+          })
+        }, 1000);
+
+        }
+
+      })
+    },
       // 注册跳转登录
       login() {
-        console.log('123')
         this.$router.push({ name: 'Login' })
       }
+    },
+    mounted () {
+      console.log(this.$store.state.user.name)
     }
   }
   </script>

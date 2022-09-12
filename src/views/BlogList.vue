@@ -7,8 +7,10 @@
             <template slot="title"><i class="el-icon-menu"></i>所有文章</template>
             <el-menu-item-group>
               <template slot="title">作者</template>
-              <el-menu-item index="2-1">选项1</el-menu-item>
-              <el-menu-item index="2-2">选项2</el-menu-item>
+              <el-menu-item index="2-1" v-for="auth in authDate" :key="auth.id" @click="showbloglist(auth.id)">
+
+                {{auth.username}}
+              </el-menu-item>
             </el-menu-item-group>
 
           </el-submenu>
@@ -18,32 +20,40 @@
       <el-container>
         <el-header style="text-align: right; font-size: 12px">
           <el-dropdown>
-            <i class="el-icon-setting" style="margin-right: 15px"></i>
+            <i class="el-icon-setting" style="margin-right: 15px;width: 30px;height: 30px;"></i>
             <el-dropdown-menu slot="dropdown">
               <el-dropdown-item>查看</el-dropdown-item>
               <el-dropdown-item @click.native="setMaskShow">新增</el-dropdown-item>
               <el-dropdown-item @click.native="quitout">退出</el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
-          <span>王小虎</span>
+          <span>{{$store.getters.getUser.username}}</span>
         </el-header>
         <el-main>
           <el-table :data="tableData" >
             <el-table-column prop="title" label="标题" width="200px" />
-            <el-table-column prop="content" label="描述" />
-            <el-table-column prop="date" label="日期" width="200px" />
+            <el-table-column prop="descript" label="描述" />
+            <el-table-column label="链接"  prop="code" :show-overflow-tooltip="true">
+              <template slot-scope="scope">
+              <div @click="goEnviro(scope.row.id)"  style="cursor:pointer;color:blue">访问</div>
+              </template>
+            </el-table-column>
+          
           </el-table>
         </el-main>
 
-        <el-pagination background layout="prev, pager, next, jumper, ->, total" :total="1000">
+
+        <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" background
+          layout="total, sizes, prev, pager, next, jumper" :total="total" :page-size="5"
+          :page-sizes="[5,10, 20, 30, 40, 50, 100]">
         </el-pagination>
 
       </el-container>
     </el-container>
     <el-row class="model" v-show="isShowMultiple">
-      <el-col class="modelFixed" ref="child" >
-          <Editor ></Editor>
-        <el-button type="primary" @click.native="setMaskhide" style="margin-left:50%;">保存文章</el-button>
+      <el-col class="modelFixed" ref="child">
+        <Editor></Editor>
+        <el-button type="primary" @click.native="setMaskhide" style="margin-left:50%;">关闭编辑器</el-button>
       </el-col>
     </el-row>
 
@@ -57,44 +67,105 @@ import http from "../utils/requets"
 export default {
   name: "BlogList",
   components: { Editor },
-  mounted () {
-    this.showbloglist()
+  mounted() {
+    this.showAuth()
   },
   data() {
     return {
       tableData: new Array(),
-      isShowMultiple: false
+      authDate: new Array(),
+      isShowMultiple: false,
+      dialogFormVisible: false,
+      tableData: [],
+      total: 0,  //总条数
+      pSize: 5,  //默认10条
+      noewuserid:0
     }
   },
   methods: {
     setMaskShow() {
 
-        this.isShowMultiple = true;
-      
+      this.isShowMultiple = true;
+
     },
     setMaskhide() {
-        this.isShowMultiple = false;
+      this.isShowMultiple = false;
     },
-    quitout(){
+    quitout() {
+      localStorage.clear()
+      this.$store.dispatch('asyncUpdateUser', {username:'',id:''})
       this.$router.push({ name: 'Login' })
     },
-    showbloglist(){
+    showbloglist(userid) {
+      // var options = {
+      //   method: 'GET',
+      //   url: 'http://127.0.0.1:8080/blog/list/' + userid
+      // };
+      // http(options).then((response) => {
+      //   this.loading = false
+      //   if (response.flag) {
+      //     this.tableData = response.data
+      //   } else {
+      //     alert("显示失败")
+      //   }
+      // }).catch(function (error) {
+      //   this.loading = false
+      //   alert("显示失败")
+      // })
+      this.noewuserid=userid
+      this.handleCurrentChange(1)
+    },
+    showAuth() {
       var options = {
-            method: 'GET',
-            url: 'http://127.0.0.1:8080/blog/list'
-          };
-          http(options).then((response) => {
-            this.loading = false
-            if (response.flag) {
-                this.tableData=response.data
-            } else {
-              alert("显示失败")
-            }
-          }).catch(function (error) {
-            this.loading = false
-            alert("显示失败")
-          })
+        method: 'GET',
+        url: 'http://127.0.0.1:8080/v1/getusers'
+      };
+      http(options).then((response) => {
+        this.loading = false
+        if (response.flag) {
+          this.authDate = response.data
+          this.showbloglist(this.authDate[0].id)
+        } else {
+          alert("显示失败")
+        }
+      }).catch(function (error) {
+        this.loading = false
+        alert("显示失败")
+      })
+      
+    },
+    getDataList(index, pageSize,userid) {  //获取数据列表
+      var options = {
+        method: 'GET',
+        url: 'http://127.0.0.1:8080/blog/page',
+        params: { pageSize: pageSize, currentPage: index ,userid:userid}
+      };
+      http(options).then(response => {
+        this.total = response.total;
+        if (response.data) {
+          this.tableData = response.data;
+        }
+      }).catch(err => {
+        alert(err);
+      })
+    },
+
+    handleSizeChange(val) {
+      console.log('每页' + val + ' 条');
+      this.pSize = val;
+      this.getDataList(1, val,this.noewuserid);
+    },
+    handleCurrentChange(val) {
+      console.log('当前页: ' + val);
+      this.getDataList(val, this.pSize,this.noewuserid);
+    },
+    mounted() {
+      this.getDataList(1, this.pSize,this.noewuserid);
+    },
+    goEnviro(articleid){
+      this.$router.push({name:'Article',query: {articleid:articleid}})
     }
+
   }
 };
 </script>
